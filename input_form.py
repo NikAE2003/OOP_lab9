@@ -4,13 +4,17 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from db_connection import writeQuery
 
+import styleSheets
+
 class InputForm(QMainWindow):
-    def __init__(self, id = None):
+    def __init__(self, parent = None):
         super().__init__()
-        
-        self._id = id
+
+        self._parent = parent
 
         self.centralWidget = QWidget(self)
+        self.setStyleSheet(styleSheets.main)
+        
         self.setCentralWidget(self.centralWidget)
 
         self.mainLayout = QVBoxLayout(self.centralWidget)
@@ -49,13 +53,14 @@ class InputForm(QMainWindow):
         self.writeAndClose_button.pressed.connect(self.writeAndClose)
 
     def write(self):
-        if self._id is None:
+        if self._parent is None:
             query = f"""
             INSERT INTO student(name, age)
             VALUES 
                 ("{self.name_lineEdit.text()}", 
-                {self.age_spinBox.value()})
+                {self.age_spinBox.value()});
             """
+            
         else:
             query = f"""
             UPDATE 
@@ -64,8 +69,11 @@ class InputForm(QMainWindow):
                 name = "{self.name_lineEdit.text()}",
                 age = {self.age_spinBox.value()}
             WHERE
-                id = {self._id}
+                id = {self._parent._id};
             """
+            self._parent.name_label.setText(self.name_lineEdit.text())
+            self._parent.age_label.setText(str(self.age_spinBox.value()))
+        
         writeQuery(query)
 
     def writeAndClose(self):

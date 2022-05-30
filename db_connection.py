@@ -1,21 +1,14 @@
-from mysql.connector import connect, Error
+from sqlite3 import connect, Error
 
-def readQuery(query = 'SELECT * FROM student'):
+def readQuery(query = 'SELECT * FROM student;'):
     try:
         #ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ
-        with connect(
-            host = 'localhost',
-            user = 'root',
-            passwd = '1234',
-            database = 'test_db'
-        ) as connection:
+        with connect(r'db/mydb.db') as connection:
             #ОБРАБОТКА ЗАПРОСА
-            results = []
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                for c in cursor:
-                    results.append(c)
-            return results
+            cursor = connection.cursor()
+
+            cursor.execute(query)
+            return cursor.fetchall()   
 
     except Error as e:
         print(e)
@@ -24,16 +17,12 @@ def readQuery(query = 'SELECT * FROM student'):
 def writeQuery(query):
     try:
         #ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ
-        with connect(
-            host = 'localhost',
-            user = 'root',
-            passwd = '1234',
-            database = 'test_db'
-        ) as connection:
+        with connect(r'db/mydb.db') as connection:
             #ОБРАБОТКА ЗАПРОСА
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                connection.commit()
+            cursor = connection.cursor()
+            
+            cursor.execute(query)
+            connection.commit()
 
     except Error as e:
         print(e)

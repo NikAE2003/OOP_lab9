@@ -4,8 +4,9 @@ from PyQt5.QtCore import *
 from table import Table
 from input_form import InputForm
 
-from db_connection import *
+from db_connection import writeQuery
 
+import styleSheets
 import sys
 
 class Window(QMainWindow):
@@ -16,6 +17,8 @@ class Window(QMainWindow):
         self.inputForm = InputForm()
 
         self.centralWidget = QWidget(self)
+        self.centralWidget.setStyleSheet(styleSheets.main)
+
         self.setCentralWidget(self.centralWidget)
         self.mainLayout = QVBoxLayout(self.centralWidget)
 
@@ -31,16 +34,21 @@ class Window(QMainWindow):
         self.buttons_layout.addWidget(self.delete_button)
 
         self.table = Table(self.centralWidget)
-
+        
         self.mainLayout.addWidget(self.table)
 
-        data = readQuery()
-
-        for row in data:
-            id, name, age = row
-            self.table.addRow(id, name, age)
-
         self.add_button.pressed.connect(self.inputForm.show)
+        self.delete_button.pressed.connect(self.deleteRows)
+        self.inputForm.write_button.pressed.connect(self.table.fillTable)
+        self.inputForm.writeAndClose_button.pressed.connect(self.table.fillTable)
+    
+    def deleteRows(self):
+        for rowId in self.table.selectedRows():
+            writeQuery(
+                f"""
+                DELETE FROM student WHERE id = {rowId};
+                """
+            )
 
 
 if __name__ == '__main__':
