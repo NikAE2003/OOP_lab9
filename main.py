@@ -19,9 +19,8 @@ class Window(QMainWindow):
         self.centralLayout = QVBoxLayout(self.centralWidget)
 
         self.tabWidget = QTabWidget(self.centralWidget)
-        self.tabWidget.addTab(Table("Склад", self.tabWidget, 'id, Наименование, Заведующий складом', [15, 0, 0]), "Склады")
-        self.tabWidget.addTab(Table("Товар", self.tabWidget, 'id, Наименование, Артикул, Цена, Количество', [15, 0, 0, 0, 0]), "Товары")
-
+        self.tabWidget.addTab(Table("Склад", 'id, Наименование, Заведующий складом', [15, 0, 0], parent = self.tabWidget), "Склады")
+        self.tabWidget.addTab(Table("Товар", 'id, Наименование, Артикул, Цена, Количество', [15, 0, 0, 0, 0], parent = self.tabWidget), "Товары")
 
         self.centralLayout.addWidget(self.tabWidget)
         self.setCentralWidget(self.centralWidget)
