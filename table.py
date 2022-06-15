@@ -1,5 +1,3 @@
-from sys import flags
-from urllib.parse import non_hierarchical
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -31,8 +29,6 @@ class Table(QTableWidget):
 
         self.setHorizontalHeaderLabels(self._names_list)
 
-        self.cellChanged.connect(self.changeData)
-
         self.fillTable()
         
 
@@ -48,15 +44,16 @@ class Table(QTableWidget):
                 self.setItem(self._row_count-1, i, QTableWidgetItem(str(row[self._names_list[i]])))
 
     def changeData(self, row):
-        query = f'UPDATE {self.name} SET'
+        query = f'UPDATE {self._name} SET'
         for i in range(len(self._names_list)):
             name = self._names_list[i]
-            data = self.item(row, i)
+            data = self.item(row, i).text()
             if name == 'id':
-                where = f'WHERE id = {self.item(row, i).text()};'
+                where = f' WHERE id = {self.item(row, i).text()};'
             else: 
-                if query != f'UPDATE {self.name} SET':
+                if query != f'UPDATE {self._name} SET':
                     query += ', ' 
                 query += f'{name} = {data}'
             query += where
+        print(query)
         writeQuery(query)

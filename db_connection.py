@@ -1,6 +1,6 @@
 from sqlite3 import connect, Error
 
-def readQuery(tableName: str = '', fieldsNames: str = '', input_query = ''):
+def readQuery(tableName: str = '', fieldsNames: str = '', id:int = None, input_query = ''):
     try:
         #ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ
         with connect(r'db/database.db') as connection:
@@ -13,7 +13,11 @@ def readQuery(tableName: str = '', fieldsNames: str = '', input_query = ''):
                     if query != 'SELECT ':
                         query += ', '
                     query += f'"{name}"'
-                query += f' FROM "{tableName}";'
+                query += f' FROM "{tableName}"'
+                
+                if id:
+                    query += f' WHERE id = {id}'
+                query += ';'
 
                 cursor.execute(query)
                 query_result = cursor.fetchall()
