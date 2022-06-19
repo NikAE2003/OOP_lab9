@@ -30,6 +30,20 @@ class Warehouse_listForm(QWidget):
         self.table = Table("Склад", 'id, Наименование, Заведующий складом', [15, 0, 0], parent = self)
         self.mainLayout.addWidget(self.table)
 
+        self.delete.pressed.connect(self.deleteRows)
+    
+    def deleteRows(self):
+        selection = set()
+        for i in self.table.selectedItems():
+            selection.add(i.row())
+        for row in selection:
+            id = self.table.item(row, 0).text()
+            query = f"""
+            DELETE FROM "Склад" WHERE id = {id};"""
+            writeQuery(query)
+        self.table.fillTable()
+
+
 class Product_listForm(QWidget):
     def __init__(self):
         super().__init__()
@@ -49,6 +63,19 @@ class Product_listForm(QWidget):
         self.table = Table("Товар", 'id, Наименование, Артикул, Цена, Количество, Склад', [15, 0, 0, 0, 0, 0], parent = self)
         self.mainLayout.addWidget(self.table)
 
+        self.delete.pressed.connect(self.deleteRows)
+
+    def deleteRows(self):
+        selection = set()
+        for i in self.table.selectedItems():
+            selection.add(i.row())
+        for row in selection:
+            id = self.table.item(row, 0).text()
+            query = f"""
+            DELETE FROM "Товар" WHERE id = {id};"""
+            writeQuery(query)
+        self.table.fillTable()    
+
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -58,7 +85,7 @@ class Window(QMainWindow):
         self.resize(700, 500)
 
         self.centralWidget = QWidget()
-        self.centralWidget.setStyleSheet(styleSheets.main)
+        # self.centralWidget.setStyleSheet(styleSheets.main)
         self.centralLayout = QVBoxLayout(self.centralWidget)
 
         self.tabWidget = QTabWidget(self.centralWidget)
@@ -116,7 +143,8 @@ class Window(QMainWindow):
 
         self._openedForms.append(form)
         self.tabWidget.addTab(form, f'{name} (товар)')
-        form.Close.pressed.connect(self.closeForm)        
+        form.Close.pressed.connect(self.closeForm)    
+        form.save.pressed.connect(self.writeProduct)    
     
     def addWarehouse(self):
         form = warehouse_inputForm.InputForm()
@@ -130,6 +158,7 @@ class Window(QMainWindow):
         self._openedForms.append(form)
         self.tabWidget.addTab(form, 'Создать товар')
         form.Close.pressed.connect(self.closeForm)
+        form.save.pressed.connect(self.writeProduct)
     
     def writeWarehouse(self):
         form = self.sender().parent()
@@ -141,7 +170,7 @@ class Window(QMainWindow):
         if id is None:
             query = f"""
             INSERT INTO "Склад"
-            ("Наименованиe", 
+            ("Наименование", 
             "Заведующий складом")
             VALUES
             ("{name}",
@@ -160,13 +189,57 @@ class Window(QMainWindow):
 
         self.warehouses.table.fillTable()
 
+    def writeProduct(self):
+        form = self.sender().parent()
+        id = form._id
+
+        name = form.name_lineEdit.text()
+        articul = form.articul_lineEdit.text()
+        price = form.price_spinBox.value()
+        count = form.count_spinBox.value()
+        warehouse = form.warehouse_spinBox.value()
+
+        if id is None:
+            query = f"""
+            INSERT INTO "Товар"
+            ("Наименование", 
+            "Артикул",
+            "Цена",
+            "Количество",
+            "Склад")
+            VALUES
+            ("{name}",
+            "{articul}",
+            "{price}",
+            "{count}",
+            "{warehouse}");
+            """
+        else:
+            query = f"""
+            UPDATE "Товар"
+            SET
+            "Наименование" = "{name}",
+            "Артикул" = "{articul}",
+            "Цена" = "{price}",
+            "Количество" = "{count}",
+            "Склад" = "{warehouse}"
+            WHERE id = {id};
+            """
+        print(query)
+        writeQuery(query)
+
+        self.products.table.fillTable()
+
     def closeForm(self):
         sender = self.sender()
-        index = self._openedForms.index(sender.parent())
-        self.tabWidget.removeTab(index + 2)
-        print(self._openedForms)
-        self._openedForms.remove(sender.parent())
-
+        try:
+            index = self._openedForms.index(sender.parent())
+            self.tabWidget.removeTab(index + 2)
+            print(self._openedForms)
+        
+            self._openedForms.remove(sender.parent())
+        except:
+            pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

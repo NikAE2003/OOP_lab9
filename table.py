@@ -31,6 +31,10 @@ class Table(QTableWidget):
 
         self.fillTable()
         
+        self.cellClicked.connect(self.select)
+
+    def select(self, row):
+        self.selectRow(row)
 
     def fillTable(self):
         self._row_count = 0
